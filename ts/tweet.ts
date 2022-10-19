@@ -1,20 +1,23 @@
 class Tweet {
   private text: string;
   time: Date;
+  text_content: string;
 
   constructor(tweet_text: string, tweet_time: string) {
     this.text = tweet_text;
     this.time = new Date(tweet_time); //, "ddd MMM D HH:mm:ss Z YYYY"
+    this.text_content = this.text.split(" https")[0];
   }
 
   //returns either 'live_event', 'achievement', 'completed_event', or 'miscellaneous'
   get source(): string {
     //TODO: identify whether the source is a live event, an achievement, a completed event, or miscellaneous.
+
     if (
-      this.text.startsWith("Just completed a") ||
-      this.text.startsWith("Just posted a")
+      this.text.includes("Just completed a") ||
+      this.text.includes("Just posted a")
     ) {
-      return "complete_event";
+      return "completed_event";
     }
     if (this.text.startsWith("Watch") && this.text.includes("now")) {
       return "live_event";
@@ -28,24 +31,93 @@ class Tweet {
 
   //returns a boolean, whether the text includes any content written by the person tweeting.
   get written(): boolean {
-    //TODO: identify whether the tweet is written
-    return false;
+    if (
+      this.text_content.includes("Check it out!") ||
+      this.source != "completed_event"
+    ) {
+      return false;
+    }
+    return true;
   }
 
   get writtenText(): string {
     if (!this.written) {
       return "";
     }
-    //TODO: parse the written text from the tweet
-    return "";
+    const splitText = this.text_content.split("- ");
+    const writtenText = splitText[splitText.length - 1];
+    return writtenText;
+  }
+
+  get parseActivity(): { type: string; distance: string } {
+    const activityInfo = { type: "", distance: "" };
+
+    let activity_content: any = "";
+    if (!this.written) {
+      let trimBeginText = this.text_content.split("ed a").pop();
+      if (trimBeginText?.startsWith("n")) {
+        trimBeginText = trimBeginText.substring(1);
+      }
+      if (trimBeginText?.includes(" with Runkeeper")) {
+        activity_content = trimBeginText
+          ? trimBeginText
+              .trim()
+              .slice(0, trimBeginText?.indexOf(" with Runkeeper"))
+          : "";
+      } else if (trimBeginText?.includes(" with @Runkeeper")) {
+        activity_content = trimBeginText
+          ? trimBeginText
+              .trim()
+              .slice(0, trimBeginText?.indexOf(" with @Runkeeper"))
+          : "";
+      }
+    } else {
+      let trimEndText = this.text_content
+        ? this.text_content.trim().split(" - ")[0]
+        : "";
+      activity_content = trimEndText ? trimEndText.split("ed a").pop() : " ";
+    }
+
+    if (activity_content?.includes("km")) {
+      activityInfo["type"] = activity_content.substring(
+        activity_content.indexOf("km") + 3,
+        activity_content.length
+      );
+      activityInfo["distance"] = activity_content
+        .substring(0, activity_content.indexOf("km") + 2)
+        .trim();
+    } else if (activity_content?.includes("mi")) {
+      activityInfo["type"] = activity_content.substring(
+        activity_content.indexOf("mi") + 3,
+        activity_content.length
+      );
+      activityInfo["distance"] = activity_content
+        .substring(0, activity_content.indexOf("mi") + 2)
+        .trim();
+    } else {
+      const workout = activity_content?.trim().split(" in ");
+
+      // // console.log(workout);
+      // activityInfo["type"] = workout ? workout[0] : "";
+
+      activityInfo["type"] = "unknown";
+      activityInfo["distance"] = "duration";
+    }
+
+    if (activityInfo["type"].includes("-")){
+      activityInfo["type"] = activityInfo["type"].slice(0, activityInfo["type"].indexOf(" -"));
+    }
+    // console.log(activityInfo);
+    return activityInfo;
   }
 
   get activityType(): string {
     if (this.source != "completed_event") {
       return "unknown";
     }
+
     //TODO: parse the activity type from the text of the tweet
-    return "";
+    return this.parseActivity.type;
   }
 
   get distance(): number {
@@ -53,7 +125,19 @@ class Tweet {
       return 0;
     }
     //TODO: prase the distance from the text of the tweet
-    return 0;
+    const distanceAmount = this.parseActivity.distance;
+    // console.log(distanceAmount);
+    if (distanceAmount.includes("km")) {
+      let mileConversion: number = +distanceAmount.split(" ")[0];
+      mileConversion = mileConversion * 1.6;
+      // console.log(mileConversion, distanceAmount);
+      return mileConversion;
+    } else if (distanceAmount.includes("mi")) {
+      // console.log(+distanceAmount.split(" ")[0], distanceAmount)
+      return +distanceAmount.split(" ")[0];
+    } else {
+      return 0;
+    }
   }
 
   getHTMLTableRow(rowNumber: number): string {
