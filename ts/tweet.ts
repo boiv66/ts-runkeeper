@@ -31,13 +31,10 @@ class Tweet {
 
   //returns a boolean, whether the text includes any content written by the person tweeting.
   get written(): boolean {
-    if (
-      this.text_content.includes("Check it out!") ||
-      this.source != "completed_event"
-    ) {
-      return false;
+    if (this.text.includes(" - ") && this.source === "completed_event") {
+      return true;
     }
-    return true;
+    return false;
   }
 
   get writtenText(): string {
@@ -104,8 +101,11 @@ class Tweet {
       activityInfo["distance"] = "duration";
     }
 
-    if (activityInfo["type"].includes("-")){
-      activityInfo["type"] = activityInfo["type"].slice(0, activityInfo["type"].indexOf(" -"));
+    if (activityInfo["type"].includes("-")) {
+      activityInfo["type"] = activityInfo["type"].slice(
+        0,
+        activityInfo["type"].indexOf(" -")
+      );
     }
     // console.log(activityInfo);
     return activityInfo;
@@ -129,7 +129,7 @@ class Tweet {
     // console.log(distanceAmount);
     if (distanceAmount.includes("km")) {
       let mileConversion: number = +distanceAmount.split(" ")[0];
-      mileConversion = mileConversion * 1.6;
+      mileConversion = mileConversion / 1.609;
       // console.log(mileConversion, distanceAmount);
       return mileConversion;
     } else if (distanceAmount.includes("mi")) {
@@ -142,6 +142,15 @@ class Tweet {
 
   getHTMLTableRow(rowNumber: number): string {
     //TODO: return a table row which summarizes the tweet with a clickable link to the RunKeeper activity
-    return "<tr></tr>";
+    const tweet_content = this.text.slice(0, this.text.indexOf("http"));
+    const tweet_link = this.text.slice(
+      this.text.indexOf("http"),
+      this.text.indexOf("#Runkeeper") - 1
+    );
+    return `<tr>
+    <td>${rowNumber} </td>
+    <td>${this.activityType}</td>
+    <td> ${tweet_content} <a href="${tweet_link}">${tweet_link}</a>  #Runkeeper</td>
+    </tr>`;
   }
 }
