@@ -203,12 +203,11 @@ function graphFrequentActivity(tweet_array) {
     mark: "point",
 
     encoding: {
-      x: { field: "activity", type: "nominal", axis: { labelAngle: 270 } },
-      y: { field: "frequence", type: "quantitative", sort: {field: "activity"} },
-    },
+      x: { field: "activity", type: "nominal", axis: { labelAngle: 270 }, sort:"-y"},
+      y: { field: "frequence", type: "quantitative", scale: { type: 'log' }}
     // "color": {"field": "Species", "type": "nominal"},
     // "shape": {"field": "Species", "type": "nominal"}
-  };
+  }}; 
   vegaEmbed("#activityVis", activity_vis_spec, { actions: false });
 }
 
