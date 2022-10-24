@@ -27,6 +27,8 @@
       integrity="sha256-3zlB5s2uwoUzrXK3BT7AX3FyvojsraNFxCc2vC/7pNI="
       crossorigin="anonymous"
     ></script>
+    <!-- Load the data for sentiment -->
+    <script type="text/javascript" src="./data/sentimentData.js"></script>
     <!--Load local runkeeper_tweets file, which will load all of the tweets into the variable RUNKEEPER_TWEETS-->
     <script type="text/javascript" src="js/get_saved_tweets.js"></script>
     <!--Load local tweet.js file, which was generated from TypeScript-->
@@ -74,6 +76,7 @@
             <th scope="col">#</th>
             <th scope="col">Activity type</th>
             <th scope="col">Tweet</th>
+            <th scope="col">Sentiment</th>
           </tr>
         </thead>
         <tbody id="tweetTable"></tbody>

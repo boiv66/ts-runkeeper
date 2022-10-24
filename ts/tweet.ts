@@ -1,3 +1,5 @@
+
+
 class Tweet {
   private text: string;
   time: Date;
@@ -140,7 +142,7 @@ class Tweet {
     }
   }
 
-  getHTMLTableRow(rowNumber: number): string {
+  getHTMLTableRow(rowNumber: number, sentiment: number): string {
     //TODO: return a table row which summarizes the tweet with a clickable link to the RunKeeper activity
     const tweet_content = this.text.slice(0, this.text.indexOf("http"));
     const tweet_link = this.text.slice(
@@ -151,6 +153,9 @@ class Tweet {
     <td>${rowNumber} </td>
     <td>${this.activityType}</td>
     <td> ${tweet_content} <a href="${tweet_link}">${tweet_link}</a>  #Runkeeper</td>
+    <td> ${sentiment} </td>
+   
     </tr>`;
   }
+
 }
